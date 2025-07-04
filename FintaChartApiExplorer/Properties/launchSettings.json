@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "FintaChartApiExplorer": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
