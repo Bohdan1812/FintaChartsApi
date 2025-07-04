@@ -1,8 +1,13 @@
-using Refit;
 using FintaChartsApi.Clients;
+using FintaChartsApi.Data;
 using FintaChartsApi.Services.Authorization;
+using Microsoft.EntityFrameworkCore;
+using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var fintachartsConfig = builder.Configuration.GetSection("Fintacharts");
 

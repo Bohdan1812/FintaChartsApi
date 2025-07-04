@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16.3-alpine
+    container_name: fintacharts_postgres
+    environment:
+      POSTGRES_DB: fintacharts_db
+      POSTGRES_USER: fintacharts_user
+      POSTGRES_PASSWORD: db_password12!
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U fintacharts_user -d fintacharts_db
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  api:
+    build:
+      context: ./FintaChartsApi
+      dockerfile: Dockerfile
+    ports:
+      - '8080:80'
+    depends_on:
+      - db
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: >-
+        Host=db;Port=5432;Database=fintacharts_db;Username=fintacharts_user;Password=db_password12!
+    volumes:
+      - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
+      - ~/.aspnet/https:/root/.aspnet/https:ro
+
+volumes:
+    postgres_data:
+        
+
