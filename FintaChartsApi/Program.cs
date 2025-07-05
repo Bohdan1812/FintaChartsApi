@@ -29,6 +29,7 @@ try
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+    //builder.Services.AddScoped<IGenericRepository, GenericRepository>();
     builder.Services.AddScoped<IInstrumentRepository, InstrumentRepository>();
     builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
     builder.Services.AddScoped<IInstrumentPriceRepository, InstrumentPriceRepository>();
@@ -71,6 +72,8 @@ try
     builder.Services.AddOpenApi();
 
     var app = builder.Build();
+
+    var _ = app.Services.GetRequiredService<L1DataProcessor>();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())

@@ -7,7 +7,7 @@ namespace FintaChartsApi.Services.WebSocket.Interfaces
         Task SubscribeToInstrumentAsync(string instrumentId, string provider);
         Task UnsubscribeFromInstrumentAsync(string instrumentId, string provider);
 
-        // Для зовнішнього доступу, якщо потрібно знати, на що підписані
+        // Додайте цей метод:
         ConcurrentDictionary<(string InstrumentId, string Provider), bool> GetActiveSubscriptions();
     }
 }

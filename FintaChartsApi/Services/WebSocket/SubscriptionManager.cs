@@ -16,7 +16,7 @@ namespace FintaChartsApi.Services.WebSocket
         private readonly ConcurrentDictionary<(string InstrumentId, string Provider), bool> _activeSubscriptions = new();
 
         // Для очікування первинних даних для інструменту після підписки
-        private readonly ConcurrentDictionary<string, TaskCompletionSource<bool>> _pendingInstrumentData = new();
+        private readonly ConcurrentDictionary<(string InstrumentId, string Provider), TaskCompletionSource<bool>> _pendingInstrumentData = new();
 
         public SubscriptionManager(
               IFintachartsWebSocketService webSocketService,
@@ -55,13 +55,15 @@ namespace FintaChartsApi.Services.WebSocket
 
                 // Додаємо TaskCompletionSource для очікування первинних даних
                 var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-                _pendingInstrumentData.TryAdd(instrumentId, tcs);
+                var key = (instrumentId, provider);
+                _pendingInstrumentData.TryAdd(key, tcs);
 
                 try
                 {
-                    // Чекаємо до 10 секунд на отримання перших даних
-                    await tcs.Task.WaitAsync(TimeSpan.FromSeconds(10));
+                    
+                    await tcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
                     _logger.LogInformation("Initial data received for {InstrumentId}.", instrumentId);
+                    await UnsubscribeFromInstrumentAsync(instrumentId, provider);
                 }
                 catch (TimeoutException)
                 {
@@ -69,7 +71,7 @@ namespace FintaChartsApi.Services.WebSocket
                 }
                 finally
                 {
-                    _pendingInstrumentData.TryRemove(instrumentId, out _); // Завжди видаляємо TCS після завершення
+                    _pendingInstrumentData.TryRemove(key, out _); // Завжди видаляємо TCS після завершення
                 }
             }
             else
@@ -91,16 +93,6 @@ namespace FintaChartsApi.Services.WebSocket
             }
         }
 
-        private async Task ResubscribeAllInstrumentsAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Resubscribing to {Count} active instruments...", _activeSubscriptions.Count);
-            foreach (var subscription in _activeSubscriptions.Keys) // Перебираємо ключі (InstrumentId, Provider)
-            {
-                // Повторно надсилаємо запит на підписку
-                await SendSubscriptionMessageAsync(subscription.InstrumentId, subscription.Provider, subscribe: true, cancellationToken);
-            }
-            _logger.LogInformation("Resubscription complete.");
-        }
 
         private async Task SendSubscriptionMessageAsync(string instrumentId, string provider, bool subscribe, CancellationToken cancellationToken)
         {
@@ -120,30 +112,34 @@ namespace FintaChartsApi.Services.WebSocket
         }
 
         // Метод, який реагує на сирі повідомлення для оновлення статусу очікування даних
-        private Task HandleIncomingMessageForSubscriptionStatus(string message, CancellationToken cancellationToken)
+        private async Task HandleIncomingMessageForSubscriptionStatus(string message, CancellationToken cancellationToken)
         {
             try
             {
-                // Для простоти, десеріалізуємо лише для InstrumentId
                 var l1Message = JsonSerializer.Deserialize<L1Message>(message);
 
-                if (l1Message?.Type == "l1-update" || l1Message?.Type == "l1-snapshot")
+                if ((l1Message?.Type == "l1-update" || l1Message?.Type == "l1-snapshot") 
+                    && !string.IsNullOrEmpty(l1Message.InstrumentId) 
+                    && !string.IsNullOrEmpty(l1Message.Provider))
                 {
-                    if (_pendingInstrumentData.TryGetValue(l1Message.InstrumentId, out var tcs))
+                    var key = (l1Message.InstrumentId, l1Message.Provider);
+                    if (_pendingInstrumentData.TryGetValue(key, out var tcs))
                     {
-                        tcs.TrySetResult(true); // Сигналізуємо, що дані отримані
+                        tcs.TrySetResult(true);
+                        // Ось тут викликайте відписку:
+                       
+                        _pendingInstrumentData.TryRemove(key, out _);
                     }
                 }
             }
             catch (JsonException)
             {
-                // Ігноруємо помилки десеріалізації тут, оскільки L1DataProcessor вже обробляє це для основної логіки
+                // Ігноруємо помилки десеріалізації
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing message for subscription status.");
             }
-            return Task.CompletedTask;
         }
     }
 

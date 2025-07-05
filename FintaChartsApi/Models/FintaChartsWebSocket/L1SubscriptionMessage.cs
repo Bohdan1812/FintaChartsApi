@@ -17,7 +17,7 @@ namespace FintaChartsApi.Models.WebSocket
         public string Provider { get; set; } = string.Empty;
 
         [JsonPropertyName("subscribe")]
-        public bool Subscribe { get; set; } = true;
+        public bool Subscribe { get; set; } 
         
         [JsonPropertyName("kinds")]
         public List<string> Kinds { get; set; } = new List<string>

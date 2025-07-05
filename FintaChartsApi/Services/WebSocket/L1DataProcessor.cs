@@ -11,33 +11,47 @@ namespace FintaChartsApi.Services.WebSocket
         private readonly IFintachartsWebSocketService _webSocketService;
         private readonly IL1StorageService _l1StorageService; // Ін'єктуємо сервіс для збереження в БД
         private readonly FintaChartsWebSocketClient _wsClient;
+        private readonly ISubscriptionManager _subscriptionManager;
 
         public L1DataProcessor(
          ILogger<L1DataProcessor> logger,
          IFintachartsWebSocketService webSocketService, // IFintachartsWebSocketService вже не має OnRawMessageReceived
          IL1StorageService l1StorageService,
-         FintaChartsWebSocketClient wsClient // Потрібно ін'єктувати FintaChartsWebSocketClient напряму
+         FintaChartsWebSocketClient wsClient, // Потрібно ін'єктувати FintaChartsWebSocketClient напряму
+         ISubscriptionManager subscriptionManager // Додаємо сюди
      )
         {
             _logger = logger;
             _webSocketService = webSocketService; // Зберегти для інших цілей, якщо потрібно
             _l1StorageService = l1StorageService;
             _wsClient = wsClient;
+            _subscriptionManager = subscriptionManager; // І зберігаємо
+
+            _logger.LogInformation("L1DataProcessor created");
 
             // Підписуємося на подію отримання повідомлень безпосередньо від FintaChartsWebSocketClient
             // L1DataProcessor тепер напряму слухає _wsClient
             _wsClient.OnMessageReceived += HandleIncomingMessage;
+            _logger.LogInformation("Subscribed to OnMessageReceived");
         }
 
         private async Task HandleIncomingMessage(string message) // Змінено: прибрано CancellationToken
         {
+            _logger.LogInformation("HandleIncomingMessage called: {Message}", message);
             try
             {
                 var l1Message = JsonSerializer.Deserialize<L1Message>(message);
 
                 if (l1Message == null || string.IsNullOrEmpty(l1Message.InstrumentId))
-                {
+                {   
                     _logger.LogWarning("Failed to deserialize WebSocket message or missing InstrumentId: {Message}", message);
+                    return;
+                }
+
+                // Перевірка підписки
+                if (!_subscriptionManager.GetActiveSubscriptions().ContainsKey((l1Message.InstrumentId, l1Message.Provider)))
+                {
+                    _logger.LogDebug("Ignoring message for unsubscribed instrument {InstrumentId} ({Provider})", l1Message.InstrumentId, l1Message.Provider);
                     return;
                 }
 

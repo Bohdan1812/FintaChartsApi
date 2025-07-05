@@ -263,3 +263,5 @@ namespace FintaChartsApi.Clients
         }
     }
 }
+
+// Додайте у L1DataProcessor перевірку:

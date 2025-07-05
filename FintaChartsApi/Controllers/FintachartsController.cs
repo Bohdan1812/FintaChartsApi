@@ -114,6 +114,7 @@ namespace FintaChartsApi.Controllers
                 // (хоча SubscribeToInstrumentAsync вже чекає на перші дані).
                 // Повторне отримання даних гарантує, що ми отримуємо їх з БД після обробки WebSocket'ом.
                 instrumentPrice = await _instrumentPriceRepository.GetByIdAsync((instrumentId, providerId));
+                await _subscriptionManager.UnsubscribeFromInstrumentAsync(instrumentId, providerId); 
 
                 if (instrumentPrice != null && (currentTime - instrumentPrice.LastUpdated) <= DataFreshnessThreshold)
                 {

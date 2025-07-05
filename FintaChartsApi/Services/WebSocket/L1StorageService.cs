@@ -48,9 +48,9 @@ namespace FintaChartsApi.Services.WebSocket
             using (var scope = _scopeFactory.CreateScope())
             {
                 // Отримуємо репозиторії через ServiceProvider скоупу
-                var instrumentRepository = scope.ServiceProvider.GetRequiredService<IGenericRepository<Instrument, string>>();
-                var providerRepository = scope.ServiceProvider.GetRequiredService<IGenericRepository<Provider, string>>();
-                var instrumentPriceRepository = scope.ServiceProvider.GetRequiredService<IGenericRepository<InstrumentPrice, (string, string)>>(); // Правильний тип TId
+                var instrumentRepository = scope.ServiceProvider.GetRequiredService<IInstrumentRepository>();
+                var providerRepository = scope.ServiceProvider.GetRequiredService<IProviderRepository>();
+                var instrumentPriceRepository = scope.ServiceProvider.GetRequiredService<IInstrumentPriceRepository>(); 
 
                 try
                 {
