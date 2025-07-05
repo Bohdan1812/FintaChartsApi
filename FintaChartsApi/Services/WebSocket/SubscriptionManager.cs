@@ -19,18 +19,28 @@ namespace FintaChartsApi.Services.WebSocket
         private readonly ConcurrentDictionary<string, TaskCompletionSource<bool>> _pendingInstrumentData = new();
 
         public SubscriptionManager(
-            IFintachartsWebSocketService webSocketService,
-            ILogger<SubscriptionManager> logger)
+              IFintachartsWebSocketService webSocketService,
+              ILogger<SubscriptionManager> logger)
         {
             _webSocketService = webSocketService;
             _logger = logger;
 
             // Підписуємося на подію перепідключення, щоб повторно відправити підписки
-            _webSocketService.OnReconnected += ResubscribeAllInstrumentsAsync;
-            // Також підписуємося на сирі повідомлення, щоб сигналізувати про отримання перших даних
+            _webSocketService.OnWebSocketConnected += ResubscribeAllInstrumentsAsync; // Змінено з OnReconnected
+                                                                                      // Також підписуємося на сирі повідомлення, щоб сигналізувати про отримання перших даних
             _webSocketService.OnRawMessageReceived += HandleIncomingMessageForSubscriptionStatus;
         }
-
+        private async Task ResubscribeAllInstrumentsAsync() // Без CancellationToken, якщо OnWebSocketConnected не передає його
+        {
+            _logger.LogInformation("WebSocket reconnected. Resubscribing to {Count} active instruments...", _activeSubscriptions.Count);
+            foreach (var subscription in _activeSubscriptions.Keys.ToList()) // Використовуйте ToList, щоб уникнути зміни колекції під час ітерації
+            {
+                // Повторно надсилаємо запит на підписку.
+                // Можливо, тут не потрібно чекати на TCS, оскільки це фоновий процес перепідписки.
+                await SendSubscriptionMessageAsync(subscription.InstrumentId, subscription.Provider, subscribe: true, CancellationToken.None);
+            }
+            _logger.LogInformation("Resubscription complete.");
+        }
         public ConcurrentDictionary<(string InstrumentId, string Provider), bool> GetActiveSubscriptions()
         {
             return _activeSubscriptions;
@@ -99,7 +109,7 @@ namespace FintaChartsApi.Services.WebSocket
                 InstrumentId = instrumentId,
                 Provider = provider,
                 Subscribe = subscribe,
-                Kinds = new List<string> { "ask", "bid", "last", "volume" } // Підписуємося на всі види
+                Kinds = new List<string> { "ask", "bid", "last" } // Підписуємося на всі види
             };
 
             var jsonMessage = JsonSerializer.Serialize(subscriptionMessage);

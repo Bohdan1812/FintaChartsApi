@@ -1,4 +1,5 @@
-﻿using FintaChartsApi.Models.WebSocket;
+﻿using FintaChartsApi.Clients;
+using FintaChartsApi.Models.WebSocket;
 using FintaChartsApi.Services.WebSocket.Interfaces;
 using System.Text.Json;
 
@@ -9,21 +10,26 @@ namespace FintaChartsApi.Services.WebSocket
         private readonly ILogger<L1DataProcessor> _logger;
         private readonly IFintachartsWebSocketService _webSocketService;
         private readonly IL1StorageService _l1StorageService; // Ін'єктуємо сервіс для збереження в БД
+        private readonly FintaChartsWebSocketClient _wsClient;
 
         public L1DataProcessor(
-            ILogger<L1DataProcessor> logger,
-            IFintachartsWebSocketService webSocketService,
-            IL1StorageService l1StorageService)
+         ILogger<L1DataProcessor> logger,
+         IFintachartsWebSocketService webSocketService, // IFintachartsWebSocketService вже не має OnRawMessageReceived
+         IL1StorageService l1StorageService,
+         FintaChartsWebSocketClient wsClient // Потрібно ін'єктувати FintaChartsWebSocketClient напряму
+     )
         {
             _logger = logger;
-            _webSocketService = webSocketService;
+            _webSocketService = webSocketService; // Зберегти для інших цілей, якщо потрібно
             _l1StorageService = l1StorageService;
+            _wsClient = wsClient;
 
-            // Підписуємося на подію отримання повідомлень від WebSocketService
-            _webSocketService.OnRawMessageReceived += HandleIncomingMessage;
+            // Підписуємося на подію отримання повідомлень безпосередньо від FintaChartsWebSocketClient
+            // L1DataProcessor тепер напряму слухає _wsClient
+            _wsClient.OnMessageReceived += HandleIncomingMessage;
         }
 
-        private async Task HandleIncomingMessage(string message, CancellationToken cancellationToken)
+        private async Task HandleIncomingMessage(string message) // Змінено: прибрано CancellationToken
         {
             try
             {
@@ -40,7 +46,9 @@ namespace FintaChartsApi.Services.WebSocket
                     case "l1-update":
                     case "l1-snapshot":
                         _logger.LogTrace("Processing L1 data for {InstrumentId} from {Provider}. Type: {Type}", l1Message.InstrumentId, l1Message.Provider, l1Message.Type);
-                        await _l1StorageService.UpdateDatabaseAsync(l1Message, cancellationToken); // Передаємо L1StorageService
+                        // Передаємо CancellationToken.None, оскільки HandleIncomingMessage більше не отримує токен
+                        // Якщо потрібно кероване скасування, L1DataProcessor має мати власний CancellationTokenSource
+                        await _l1StorageService.UpdateDatabaseAsync(l1Message, CancellationToken.None);
                         break;
                     case "ack":
                         _logger.LogDebug("Received ACK message: {Message}", message);

@@ -4,16 +4,16 @@ namespace FintaChartsApi.Services.WebSocket.Interfaces
 {
     public interface IFintachartsWebSocketService
     {
-        Task ConnectAsync(CancellationToken cancellationToken);
-        Task CloseAsync(CancellationToken cancellationToken);
-        Task SendMessageAsync(byte[] messageBytes, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken);
+        // Подія для сповіщення про підключення WebSocket
+        event Func<Task> OnWebSocketConnected; // Може бути Func<CancellationToken, Task> якщо токен потрібен
 
-        // Подія, яку інші сервіси можуть підписати, щоб отримувати сирі повідомлення
-        event Func<string, CancellationToken, Task> OnRawMessageReceived;
-
-        // Подія для сигналізації про відновлення з'єднання
-        event Func<CancellationToken, Task> OnReconnected;
+        // Подія для передачі сирих повідомлень від WebSocket
+        event Func<string, CancellationToken, Task>? OnRawMessageReceived;
 
         WebSocketState State { get; }
+
+        Task StartAsync(CancellationToken cancellationToken);
+        Task StopAsync(CancellationToken cancellationToken);
+        Task SendMessageAsync(byte[] messageBytes, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken);
     }
 }
