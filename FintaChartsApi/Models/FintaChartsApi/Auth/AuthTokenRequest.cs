@@ -5,7 +5,7 @@ namespace FintaChartsApi.Models.FintaChartsApi.Auth
     public record AuthTokenRequest
     {
         [JsonPropertyName("grant_type")]
-        public string GrantType { get; init; } = "password"; // Змінено на "password"
+        public string GrantType { get; init; } = string.Empty;
 
         [JsonPropertyName("client_id")]
         public string ClientId { get; init; } = "app-cli"; // Змінено на "app-cli"

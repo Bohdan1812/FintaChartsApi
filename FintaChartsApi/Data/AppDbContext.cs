@@ -9,50 +9,42 @@ namespace FintaChartsApi.Data
         {
         }
 
-        public DbSet<Bar> Bars { get; set; }
-
         // DbSet для провайдерів
-        public DbSet<Provider> Providers { get; set; }
+        public DbSet<Provider> Providers { get; set; } = null!; 
 
         // DbSet для інструментів
-        public DbSet<Instrument> Instruments { get; set; }
+        public DbSet<Instrument> Instruments { get; set; } = null!;
+
+        public DbSet<InstrumentPrice> InstrumentPrices { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // --- Конфігурація для таблиці Bars ---
-            // Встановлюємо складений первинний ключ для Bar: InstrumentId, Resolution, T (Timestamp)
-            modelBuilder.Entity<Bar>()
-                .HasKey(b => new { b.InstrumentId, b.Resolution, b.T });
-
-            // Зазначаємо, що Id генерується базою даних при додаванні нового запису
-            modelBuilder.Entity<Bar>()
-                .Property(b => b.Id)
-                .ValueGeneratedOnAdd();
-
-            modelBuilder.Entity<Bar>()
-                .HasOne(b => b.Instrument)
-                .WithMany(i => i.Bars)
-                .HasForeignKey(b => b.InstrumentId);
-
-            modelBuilder.Entity<Bar>()
-                .HasOne<Provider>()
-                .WithMany(p => p.Bars)
-                .HasForeignKey(b => b.ProviderId)
-                .IsRequired();
-
             modelBuilder.Entity<Provider>()
-                .HasIndex(p => p.Id)
-                .IsUnique(); // Додаємо унікальний індекс для Id провайдера
+                .HasKey(p => p.Id);
+
+            modelBuilder.Entity<Provider>().
+                HasMany(p => p.Prices)
+                .WithOne(ip => ip.Provider)
+                .HasForeignKey(ip => ip.ProviderId)
+                .OnDelete(DeleteBehavior.Restrict); 
 
             modelBuilder.Entity<Instrument>()
-                .HasIndex(i => i.Id)
-                .IsUnique(); // Додаємо унікальний індекс для Id інструменту
+                .HasKey(i => i.Id);
 
             modelBuilder.Entity<Instrument>()
                 .HasIndex(i => i.Symbol)
-                .IsUnique(); // Додаємо унікальний індекс для Symbol інструменту
+                .IsUnique(); 
+
+            modelBuilder.Entity<Instrument>()
+                .HasMany(i => i.Prices)
+                .WithOne(ip => ip.Instrument)
+                .HasForeignKey(ip => ip.InstrumentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<InstrumentPrice>()
+                .HasKey(ip => new { ip.InstrumentId, ip.ProviderId });
 
         }
     }

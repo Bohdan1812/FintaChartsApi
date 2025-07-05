@@ -5,13 +5,9 @@ namespace FintaChartsApi.Models.FintaChartsApi.Instruments
     public record ListInstrumentsRequest
     {
         [JsonPropertyName("provider")]
-        public string Provider { get; init; } = "oanda"; // Значення за замовчуванням, якщо завжди "oanda"
-
-        // Kind: forex
+        public string? Provider { get; init; } 
         [JsonPropertyName("kind")]
-        public string Kind { get; init; } = "forex"; // Значення за замовчуванням, якщо завжди "forex"
-
-        // Symbol: EUR/USD
+        public string? Kind { get; init; }  
         [JsonPropertyName("symbol")]
         public string? Symbol { get; init; }
 

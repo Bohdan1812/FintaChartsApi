@@ -7,9 +7,7 @@ namespace FintaChartsApi.Models.Data
         [Key] 
         [MaxLength(50)] 
         public string Id { get; set; } = string.Empty; // Ідентифікатор провайдера з Fintacharts API (наприклад, "simulation", "live")
-
-
-        // Навігаційна властивість для зв'язку 1:Many з Bar
-        public ICollection<Bar> Bars { get; set; } = new List<Bar>();
+           
+        public virtual ICollection<InstrumentPrice> Prices { get; set; } = new List<InstrumentPrice>();
     }
 }

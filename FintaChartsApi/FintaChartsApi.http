@@ -4,3 +4,14 @@ GET {{FintaChartsApi_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+
+GET {{FintaChartsApi_HostAddress}}/fintacharts/instruments
+Accept: application/json
+
+
+###$
+
+GET {{FintaChartsApi_HostAddress}}/fintacharts/providers
+Accept: application/json
+

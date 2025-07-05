@@ -1,12 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace FintaChartsApi.Models.FintaChartsApi.WebSocket
+namespace FintaChartsApi.Models.WebSocket
 {
-    public class PriceVolumeData
+    public class L1PriceData
     {
         //Мітка часу, що вказує, коли ці дані були востаннє оновлені або зафіксовані.
         [JsonPropertyName("timestamp")]
-        public DateTime TimeStamp { get; set; } = DateTime.MinValue;
+        public DateTimeOffset TimeStamp { get; set; } = DateTimeOffset.MinValue;
 
         //Ціна активу. Це може бути ціна покупки (Bid), ціна продажу (Ask), або ціна останньої угоди (Last/Trade).
 

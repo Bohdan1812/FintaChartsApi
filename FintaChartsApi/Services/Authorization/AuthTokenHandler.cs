@@ -4,9 +4,9 @@ namespace FintaChartsApi.Services.Authorization
 {
     public class AuthTokenHandler : DelegatingHandler
     {
-        private readonly AuthTokenManager _tokenManager;
+        private readonly ITokenProvider _tokenManager;
 
-        public AuthTokenHandler(AuthTokenManager tokenManager)
+        public AuthTokenHandler(ITokenProvider tokenManager)
         {
             _tokenManager = tokenManager;
         }

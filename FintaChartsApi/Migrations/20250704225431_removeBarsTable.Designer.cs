@@ -3,6 +3,7 @@ using System;
 using FintaChartsApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FintaChartsApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250704225431_removeBarsTable")]
+    partial class removeBarsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,49 @@ namespace FintaChartsApi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("FintaChartsApi.Models.Data.Bar", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("C")
+                        .HasColumnType("numeric(18, 9)");
+
+                    b.Property<decimal>("H")
+                        .HasColumnType("numeric(18, 9)");
+
+                    b.Property<string>("InstrumentId")
+                        .IsRequired()
+                        .HasColumnType("character varying(36)");
+
+                    b.Property<decimal>("L")
+                        .HasColumnType("numeric(18, 9)");
+
+                    b.Property<decimal>("O")
+                        .HasColumnType("numeric(18, 9)");
+
+                    b.Property<string>("ProviderId")
+                        .IsRequired()
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("T")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("V")
+                        .HasColumnType("numeric(18, 9)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InstrumentId");
+
+                    b.HasIndex("ProviderId");
+
+                    b.ToTable("Bars");
+                });
 
             modelBuilder.Entity("FintaChartsApi.Models.Data.Instrument", b =>
                 {
@@ -41,6 +87,10 @@ namespace FintaChartsApi.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<string>("Exchange")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("Kind")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -56,40 +106,13 @@ namespace FintaChartsApi.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Id")
+                        .IsUnique();
+
                     b.HasIndex("Symbol")
                         .IsUnique();
 
                     b.ToTable("Instruments");
-                });
-
-            modelBuilder.Entity("FintaChartsApi.Models.Data.InstrumentPrice", b =>
-                {
-                    b.Property<string>("InstrumentId")
-                        .HasColumnType("character varying(36)");
-
-                    b.Property<string>("ProviderId")
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<decimal?>("Ask")
-                        .HasColumnType("numeric(18, 8)");
-
-                    b.Property<decimal?>("Bid")
-                        .HasColumnType("numeric(18, 8)");
-
-                    b.Property<decimal?>("Last")
-                        .HasColumnType("numeric(18, 8)");
-
-                    b.Property<DateTimeOffset>("LastUpdated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long?>("Volume")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("InstrumentId", "ProviderId");
-
-                    b.HasIndex("ProviderId");
-
-                    b.ToTable("InstrumentPrices");
                 });
 
             modelBuilder.Entity("FintaChartsApi.Models.Data.Provider", b =>
@@ -100,21 +123,24 @@ namespace FintaChartsApi.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Id")
+                        .IsUnique();
+
                     b.ToTable("Providers");
                 });
 
-            modelBuilder.Entity("FintaChartsApi.Models.Data.InstrumentPrice", b =>
+            modelBuilder.Entity("FintaChartsApi.Models.Data.Bar", b =>
                 {
                     b.HasOne("FintaChartsApi.Models.Data.Instrument", "Instrument")
-                        .WithMany("Prices")
+                        .WithMany("Bars")
                         .HasForeignKey("InstrumentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("FintaChartsApi.Models.Data.Provider", "Provider")
-                        .WithMany("Prices")
+                        .WithMany("Bars")
                         .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Instrument");
@@ -124,12 +150,12 @@ namespace FintaChartsApi.Migrations
 
             modelBuilder.Entity("FintaChartsApi.Models.Data.Instrument", b =>
                 {
-                    b.Navigation("Prices");
+                    b.Navigation("Bars");
                 });
 
             modelBuilder.Entity("FintaChartsApi.Models.Data.Provider", b =>
                 {
-                    b.Navigation("Prices");
+                    b.Navigation("Bars");
                 });
 #pragma warning restore 612, 618
         }

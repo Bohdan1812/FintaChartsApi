@@ -30,11 +30,6 @@ namespace FintaChartsApi.Models.Data
         [Column(TypeName = "numeric(18, 9)")]
         public decimal? TickSize { get; set; }
 
-        [MaxLength(100)]
-        public string? Exchange { get; set; } // Біржа (наприклад, "NASDAQ")
-
-        // Навігаційна властивість для зв'язку 1:Many з Bar
-        // Один інструмент може мати багато свічок
-        public ICollection<Bar> Bars { get; set; } = new List<Bar>();
+        public virtual ICollection<InstrumentPrice> Prices { get; set; } = new List<InstrumentPrice>();
     }
 }

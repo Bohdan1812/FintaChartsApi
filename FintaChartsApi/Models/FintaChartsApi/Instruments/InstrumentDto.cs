@@ -8,10 +8,10 @@
         public string? Description { get; set; }
         public decimal? TickSize { get; set; }
         public string? Currency { get; set; }
-        public string? BaseCurrency { get; set; } // Додано з вашого прикладу
+        public string? BaseCurrency { get; set; } 
 
-        // Вкладені об'єкти
+       /* // Вкладені об'єкти
         public MappingsDto? Mappings { get; set; }
-        public ProfileDto? Profile { get; set; }
+        public ProfileDto? Profile { get; set; }*/
     }
 }

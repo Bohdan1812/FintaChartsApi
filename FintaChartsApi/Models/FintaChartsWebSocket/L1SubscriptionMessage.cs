@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace FintaChartsApi.Models.FintaChartsApi.WebSocket
+namespace FintaChartsApi.Models.WebSocket
 {
     public record L1SubscriptionMessage
     {
@@ -10,7 +10,7 @@ namespace FintaChartsApi.Models.FintaChartsApi.WebSocket
         [JsonPropertyName("id")]
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        [JsonPropertyName("instruentId")]
+        [JsonPropertyName("instrumentId")]
         public string InstrumentId { get; set; } = string.Empty;
 
         [JsonPropertyName("provider")]
