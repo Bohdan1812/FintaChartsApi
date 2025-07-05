@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:16.3-alpine
@@ -25,7 +27,8 @@ services:
     ports:
       - '8080:80'
     depends_on:
-      - db
+      db:
+        condition: service_healthy 
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: >-
@@ -33,8 +36,13 @@ services:
     volumes:
       - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
       - ~/.aspnet/https:/root/.aspnet/https:ro
+    command: > 
+      bash -c "
+      echo 'Applying database migrations...' &&
+      dotnet ef database update --project FintaChartsApi.csproj && 
+      echo 'Migrations applied. Starting application...' &&
+      dotnet FintaChartsApi.dll
+      "
 
 volumes:
-    postgres_data:
-        
-
+  postgres_data:
