@@ -14,13 +14,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test:
-        - CMD-SHELL
-        - pg_isready -U fintacharts_user -d fintacharts_db
+      test: ["CMD-SHELL", "pg_isready -U fintacharts_user -d fintacharts_db"]
       interval: 10s
       timeout: 5s
       retries: 5
-  api:
+
+  fintachartsapi:
     build:
       context: ./FintaChartsApi
       dockerfile: Dockerfile
@@ -28,21 +27,14 @@ services:
       - '8080:80'
     depends_on:
       db:
-        condition: service_healthy 
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: >-
-        Host=db;Port=5432;Database=fintacharts_db;Username=fintacharts_user;Password=db_password12!
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=fintacharts_db;Username=fintacharts_user;Password=db_password12!
     volumes:
       - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
       - ~/.aspnet/https:/root/.aspnet/https:ro
-    command: > 
-      bash -c "
-      echo 'Applying database migrations...' &&
-      dotnet ef database update --project FintaChartsApi.csproj && 
-      echo 'Migrations applied. Starting application...' &&
-      dotnet FintaChartsApi.dll
-      "
+    restart: unless-stopped
 
 volumes:
   postgres_data:

@@ -81,34 +81,26 @@ namespace FintaChartsApi.Services.FintChartsApi
 
                     if (!existingProviders.ContainsKey(providerId))
                     {
-                        // Якщо провайдер з таким ID не існує, додаємо його
-                        // Використовуємо ID як Name за замовчуванням, оскільки інших даних немає
                         newProviders.Add(new Provider
                         {
                             Id = providerId,
                         });
                     }
-                    bool changesMade = false;
-
-                    if (newProviders.Any())
-                    {
-                        await providerRepository.AddRangeAsync(newProviders);
-
-                        _logger.LogInformation("Added {Count} new providers to the database.", newProviders.Count);
-                        changesMade = true;
-                    }
-
-                    if (changesMade)
-                    {
-                        var chengedRows = await providerRepository.SaveChangesAsync();
-                        _logger.LogInformation("Provider database changes saved successfully.");
-                    }
-                    else
-                    {
-                        _logger.LogInformation("No new providers found. Provider database is up to date.");
-                    }
-
                 }
+
+                if (newProviders.Any())
+                {
+                    await providerRepository.AddRangeAsync(newProviders);
+                    var changedRows = await providerRepository.SaveChangesAsync();
+
+                    _logger.LogInformation("Added {Count} new providers to the database.", newProviders.Count);
+                    _logger.LogInformation("Provider database changes saved successfully.");
+                }
+                else
+                {
+                    _logger.LogInformation("No new providers found. Provider database is up to date.");
+                }
+
             }
             catch (OperationCanceledException)
             {
