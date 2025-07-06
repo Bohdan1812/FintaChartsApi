@@ -21,7 +21,7 @@ services:
 
   fintachartsapi:
     build:
-      context: ./FintaChartsApi
+      context: ./FintaCharts.Api
       dockerfile: Dockerfile
     ports:
       - '8080:80'

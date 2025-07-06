@@ -33,6 +33,9 @@ namespace FintaChartsApi.Controllers
         }
 
         [HttpGet("instrumentPrice")]
+        [ProducesResponseType(typeof(IEnumerable<string>), 200)]
+        [ProducesResponseType(404)] 
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetPrice([FromQuery]string instrumentId, [FromQuery]string provider)
         {
             var price = await _instrumentPriceSerice.GetLatestPriceAsync(instrumentId, provider);
@@ -47,6 +50,7 @@ namespace FintaChartsApi.Controllers
 
         [HttpGet("instruments")] // Це HTTP GET запит
         [ProducesResponseType(typeof(IEnumerable<Instrument>), 200)] // Описуємо очікуваний тип відповіді (для Swagger/OpenAPI)
+        [ProducesResponseType(404)]
         [ProducesResponseType(500)] // Описуємо можливу помилку сервера
         public async Task<IActionResult> GetInstruments()
         {
@@ -65,8 +69,9 @@ namespace FintaChartsApi.Controllers
         }
 
 
-        [ProducesResponseType(typeof(IEnumerable<string>), 200)] // Описуємо очікуваний тип відповіді (для Swagger/OpenAPI)
-        [ProducesResponseType(500)] // Описуємо можливу помилку сервера
+        [ProducesResponseType(typeof(IEnumerable<string>), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)] 
         [HttpGet("providers")]
         public async Task<IActionResult> GetProviders()
         {
