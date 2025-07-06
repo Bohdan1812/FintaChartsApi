@@ -57,13 +57,14 @@ namespace FintaChartsApi.Services.Price
        
             try
             {
+                var existingPrice = await _instrumentPriceRepository.GetByIdAsync((instrumentId, provider));
 
                 var msg = await _socket.SubscribeOnceAsync(instrumentId, provider, DELAY);
 
                 if (msg is null)
                 {
                     _logger.LogWarning("⏱ Таймаут або помилка при отриманні ціни для {InstrumentId}", instrumentId);
-                    return null;
+                    return existingPrice;
                 }
 
                 var ask = msg.Type == "l1-update" ? msg.Ask : msg.Quote?.Ask;
@@ -83,7 +84,7 @@ namespace FintaChartsApi.Services.Price
                     LastUpdated = last?.TimeStamp ?? ask?.TimeStamp ?? bid?.TimeStamp ?? DateTimeOffset.UtcNow
                 };
 
-                var existingPrice = await _instrumentPriceRepository.GetByIdAsync((instrumentId, provider));
+               
 
                 if (existingPrice is null)
                 {
