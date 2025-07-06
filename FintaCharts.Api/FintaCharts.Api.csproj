@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Models\Data\Bar.cs" />
   </ItemGroup>
 
   <ItemGroup>
