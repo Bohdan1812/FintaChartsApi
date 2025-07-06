@@ -1,5 +1,4 @@
 ﻿using FintaChartsApi.Models.FintaChartsApi.Auth;
-using FintaChartsApi.Models.FintaChartsApi.Bars;
 using FintaChartsApi.Models.FintaChartsApi.Exchanges;
 using FintaChartsApi.Models.FintaChartsApi.FintachartsApiExplorer.Models.FintachartsApi;
 using FintaChartsApi.Models.FintaChartsApi.Instruments;
@@ -31,17 +30,6 @@ namespace FintaChartsApi.Clients
         // Отримує список бірж на основі заданого провайдера.
         [Get("/api/instruments/v1/exchanges")]
         Task<ExchangesResponse> GetExchanges([Query] ListExchangesRequest request);
-
-
-
-        // Отримує історичні дані свічок, відлічуючи назад від поточної або заданої дати.
-        [Get("/api/bars/v1/bars/count-back")]
-        Task<BarsResponse> GetBarsByCount([Query] GetBarsByCountRequest request);
-
-
-
-        // Отримує історичні дані свічок за вказаним діапазоном дат.
-        [Get("/api/bars/v1/bars/date-range")]
-        Task<BarsResponse> GetBarsByDateRange([Query] GetBarsByDateRangeRequest request);
+       
     }
 }

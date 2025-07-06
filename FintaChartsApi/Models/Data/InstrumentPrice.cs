@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace FintaChartsApi.Models.Data
 {
@@ -25,8 +26,10 @@ namespace FintaChartsApi.Models.Data
         [Required]
         public DateTimeOffset? LastUpdated { get; set; }
 
+        [JsonIgnore]
         public virtual Instrument Instrument { get; set; } = null!;
 
+        [JsonIgnore]
         public virtual Provider Provider { get; set; } = null!;
 
 
