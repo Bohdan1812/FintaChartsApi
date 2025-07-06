@@ -62,7 +62,7 @@ namespace FintaChartsApi.Migrations
                     b.ToTable("Instruments");
                 });
 
-            modelBuilder.Entity("FintaChartsApi.Models.Data.InstrumentPrice", b =>
+            modelBuilder.Entity("FintaChartsApi.Models.Data.Price", b =>
                 {
                     b.Property<string>("InstrumentId")
                         .HasColumnType("character varying(36)");
@@ -103,7 +103,7 @@ namespace FintaChartsApi.Migrations
                     b.ToTable("Providers");
                 });
 
-            modelBuilder.Entity("FintaChartsApi.Models.Data.InstrumentPrice", b =>
+            modelBuilder.Entity("FintaChartsApi.Models.Data.Price", b =>
                 {
                     b.HasOne("FintaChartsApi.Models.Data.Instrument", "Instrument")
                         .WithMany("Prices")

@@ -4,8 +4,7 @@ using FintaChartsApi.Data.Repositories;
 using FintaChartsApi.Data.Repositories.Interfaces;
 using FintaChartsApi.Services.Authorization;
 using FintaChartsApi.Services.FintChartsApi;
-using FintaChartsApi.Services.WebSocket;
-using FintaChartsApi.Services.WebSocket.Interfaces;
+using FintaChartsApi.Services.Price;
 using Microsoft.EntityFrameworkCore;
 using Refit;
 using Serilog;
@@ -29,6 +28,9 @@ try
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+    builder.Services.AddSingleton<IFintaSocketClient, FintaSocketClient>();
+
     //builder.Services.AddScoped<IGenericRepository, GenericRepository>();
     builder.Services.AddScoped<IInstrumentRepository, InstrumentRepository>();
     builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
@@ -41,16 +43,10 @@ try
     // Add services to the container.
     
     builder.Services.AddSingleton<ITokenProvider, FintaChartsTokenProvider>();
-    builder.Services.AddSingleton<FintaChartsWebSocketClient>();
-
-    builder.Services.AddSingleton<IFintachartsWebSocketService, FintachartsWebSocketService>();
-    builder.Services.AddHostedService(provider => (FintachartsWebSocketService)provider.GetRequiredService<IFintachartsWebSocketService>());
-    builder.Services.AddSingleton<L1DataProcessor>();
-    builder.Services.AddSingleton<IL1StorageService, L1StorageService>();
-    builder.Services.AddSingleton<ISubscriptionManager, SubscriptionManager>();
-
 
     builder.Services.AddScoped<AuthTokenHandler>();
+    builder.Services.AddScoped<IInstrumentPriceService, InstrumentPriceService>();
+    builder.Services.AddScoped < IFintaSocketClient, FintaSocketClient>();
 
 
     builder.Services
@@ -72,8 +68,6 @@ try
     builder.Services.AddOpenApi();
 
     var app = builder.Build();
-
-    var _ = app.Services.GetRequiredService<L1DataProcessor>();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
