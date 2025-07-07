@@ -6,16 +6,16 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["FintaChartsApi.csproj", "."]
-RUN dotnet restore "FintaChartsApi.csproj"
+COPY ["FintaCharts.Api.csproj", "."]
+RUN dotnet restore "FintaCharts.Api.csproj"
 COPY . .
-RUN dotnet build "FintaChartsApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "FintaCharts.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "FintaChartsApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "FintaCharts.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "FintaChartsApi.dll", "--urls", "http://0.0.0.0:80"]
+ENTRYPOINT ["dotnet", "FintaCharts.Api.dll", "--urls", "http://0.0.0.0:80"]

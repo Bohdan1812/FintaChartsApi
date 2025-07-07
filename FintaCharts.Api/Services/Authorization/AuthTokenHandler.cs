@@ -4,21 +4,31 @@ namespace FintaChartsApi.Services.Authorization
 {
     public class AuthTokenHandler : DelegatingHandler
     {
+        private readonly ILogger<AuthTokenHandler> _logger;
         private readonly ITokenProvider _tokenManager;
 
-        public AuthTokenHandler(ITokenProvider tokenManager)
+        public AuthTokenHandler(ITokenProvider tokenManager, ILogger<AuthTokenHandler> logger)
         {
             _tokenManager = tokenManager;
+            _logger = logger;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            // !!! ВАЖЛИВА ЛОГІКА: Якщо це запит на отримання токена, не додаємо заголовок Authorization !!!
+            
             if (request.RequestUri?.AbsolutePath.Contains("openid-connect/token") == true)
             {
                 // Якщо це запит на токен, пропускаємо його без додавання заголовка авторизації.
                 // Він буде оброблений базовим HttpClient.
-                return await base.SendAsync(request, cancellationToken);
+                try 
+                {                 
+                    return await base.SendAsync(request, cancellationToken);
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogError("Помилка при отриманні токена! {ex}", ex.Message);
+                    
+                }
             }
 
             var accessToken = await _tokenManager.GetAccessTokenAsync();
